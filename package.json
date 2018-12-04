@@ -1,0 +1,10 @@
+{
+  "name": "adventofcode",
+  "version": "0.0.1",
+  "description": "",
+  "author": "Daniel K. Takeuchi",
+  "license": "ISC",
+  "dependencies": {
+    "fs": "0.0.1-security"
+  }
+}
