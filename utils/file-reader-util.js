@@ -1,8 +1,8 @@
 const fs = require('fs');
 
+const getDataString = (filePath) => fs.readFileSync(`${filePath}`, 'utf8');
+
 module.exports = {
-  getDataArray(filePath) {
-    const inputString = fs.readFileSync(`${filePath}`, 'utf8');
-    return inputString.split('\n');
-  }
+  getDataString,
+  getDataArray: (filePath) => getDataString(filePath).split('\n')
 };
