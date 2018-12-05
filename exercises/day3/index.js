@@ -52,7 +52,6 @@ for (let i = 0; i < claims.length; i++) {
         break;
       }
     }
-    if (hasOverlap) break;
   }
   if (!hasOverlap) {
     console.log(`Day 3 Exercise 2 Answer: ${claim.id}`);
