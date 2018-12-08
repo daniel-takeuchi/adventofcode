@@ -16,7 +16,7 @@ const instructions = input.map(i => new Instruction(i));
 const steps = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
 
 const prerequirements = new Set(instructions.map(i => i.step));
-function getStepOrder2(current, instrs, done = []) {
+function getStepOrder(current, instrs, done = []) {
   if (!current) current = steps.find(s => !prerequirements.has(s) && !done.includes(s));
   done.push(current);
 
@@ -26,12 +26,53 @@ function getStepOrder2(current, instrs, done = []) {
   next.sort((a, b) => a.step < b.step ? -1 : 1);
 
   if (unmetPrereqs.length && !next[0]) {
-    return getStepOrder2(null, instrs, done);
+    return getStepOrder(null, instrs, done);
   } else if (next[0]) {
-    return getStepOrder2(next[0].step, instrs, done);
+    return getStepOrder(next[0].step, instrs, done);
   }
   return done;
 }
 
-const stepOrder = getStepOrder2(null, instructions);
+const stepOrder = getStepOrder(null, instructions);
 console.log(`Day 7 Exercise 1 Answer: ${stepOrder.join('')}`);
+
+// Exercise 2
+function getNextSteps(instrs, timeline, done) {
+  let nextSteps = steps.filter(s => !prerequirements.has(s) && !done.includes(s));
+  nextSteps = nextSteps.concat(instrs.filter(i => done.includes(i.prerequisite) && !done.includes(i.step)).map(i => i.step));
+  const unmetPrereqs = instrs.filter(i => !done.includes(i.prerequisite) && !done.includes(i.step)).map(p => p.step);
+  if (unmetPrereqs.length > 0) nextSteps = nextSteps.filter(n => !unmetPrereqs.includes(n));
+  nextSteps = nextSteps.sort((a, b) => {
+    const lastSecond = timeline[timeline.length - 1];
+    if (lastSecond && lastSecond.includes(a)) return -1;
+    if (lastSecond && lastSecond.includes(b)) return 1;
+    return a < b ? -1 : 1;
+  });
+  return new Set(nextSteps);
+}
+
+function getStepsDuration(defaultTaskDuration = 60) {
+  return steps.reduce((acc, step) => {
+    acc[step] = defaultTaskDuration + steps.indexOf(step) + 1;
+    return acc;
+  }, {});
+}
+
+function getTimeline(instrs, stepsDuration, timeline=[], done = [], workerCount = 5) {
+  let second = 0;
+  let isDone = false;
+  while (!isDone) {
+    let nextSteps = getNextSteps(instrs, timeline, done);
+    nextSteps = [...nextSteps].slice(0, workerCount);
+    timeline.push(nextSteps.join(''));
+    nextSteps.forEach((step) => {
+      if (stepsDuration[step] === timeline.filter(s => s.includes(step)).length) done.push(step);
+    });
+    if (done.length === 26) isDone = true;
+    ++second;
+  }
+  return second;
+}
+
+const stepsDurations = getStepsDuration();
+console.log(`Day 7 Exercise 2 Answer: ${getTimeline(instructions, stepsDurations)}`);
